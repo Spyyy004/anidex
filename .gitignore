@@ -44,4 +44,4 @@ app.*.map.json
 .env
 
 /ios/Runner/info.plist
-/lib/firebase_options
+/lib/firebase_options.dart
