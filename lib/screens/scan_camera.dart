@@ -5,9 +5,12 @@ import 'package:anidex/models/animal_info.dart';
 import 'package:anidex/screens/animal_info.dart';
 import 'package:anidex/utils.dart';
 import 'package:camera/camera.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 
 class CameraExampleHome extends StatefulWidget {
   const CameraExampleHome({Key? key}) : super(key: key);
@@ -28,11 +31,14 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   AnimationController? _captureAnimationController;
   Animation<double>? _captureAnimation;
 
+  bool isConnected = true; // Flag to track internet connectivity
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance!.addObserver(this);
     _initializeCamera();
+    _checkConnectivity();
 
     // Initialize capture animation controller
     _captureAnimationController = AnimationController(
@@ -58,6 +64,13 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       _initializeControllerFuture = controller.initialize();
       setState(() {});
     }
+  }
+
+  Future<void> _checkConnectivity() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    setState(() {
+      isConnected = connectivityResult[0] != ConnectivityResult.none;
+    });
   }
 
   @override
@@ -95,31 +108,49 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                         children: [
-                          OutlinedButton(
-                            style: buttonStyles,
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
                             onPressed: () {
                               capturedImage = null;
                               setState(() {});
                             },
-                            child: Text(
+                            icon: Icon(Icons.camera),
+                            label: Text(
                               "Retake",
-                              style: regularTitleStyles.merge(
-                                TextStyle(color: Colors.white),
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 16,
                               ),
                             ),
                           ),
-                          OutlinedButton(
-                            style: buttonStyles,
-                            onPressed: () {
+                          ElevatedButton.icon(
+                            style: ElevatedButton.styleFrom(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                            ),
+                            onPressed: () async {
+                              if (!isConnected) {
+                                final x = await saveImageLocally(capturedImage!);
+
+                                print(x);
+                                Fluttertoast.showToast(
+                                    msg: "Image saved locally. Data will be synced when internet is back.");
+                                capturedImage = null;
+                                setState(() {});
+                                return;
+                              }
 
                               final file = File(capturedImage!.path);
-
 
                               setState(() {
                                 showLoader = true;
                                 showButtons = false;
                               });
-
 
                               gemini
                                   .textAndImage(
@@ -127,23 +158,17 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                                 images: [file.readAsBytesSync()],
                               )
                                   .then((value) {
-                                print("HEYOO23 $value");
-                                final jsonString =
-                                value!.content!.parts!.last.text
+
+                                final jsonString = value!.content!.parts!.last.text
                                     .toString();
-                                print("yoheee $jsonString");
-                                final jsonDecoded =
-                                jsonDecode(jsonString);
-                                final animalInfo =
-                                AnimalInfoModel.fromJson(
-                                    jsonDecode(jsonString));
-                                if(animalInfo.basicInformation!.commonName == "NA"){
+                                final animalInfo = AnimalInfoModel.fromJson(jsonDecode(jsonString));
+                                if (animalInfo.basicInformation!.commonName == "NA") {
                                   Fluttertoast.showToast(msg: "No animal found");
                                   setState(() {
                                     showLoader = false;
                                     showButtons = true;
                                   });
-
+                                  return;
                                 }
                                 setState(() {
                                   showLoader = false;
@@ -152,16 +177,15 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) =>
-                                        AnimalInfo(
-                                          capturedImage: capturedImage!.path,
-                                          animalInfoModel: animalInfo,
-                                          isInfo: false,
-                                        ),
+                                    builder: (context) => AnimalInfo(
+                                      capturedImage: capturedImage!.path,
+                                      animalInfoModel: animalInfo,
+                                      isInfo: false,
+                                    ),
                                   ),
                                 );
-                              })
-                                  .catchError((e) {
+                                // capturedImage = null;
+                              }).catchError((e) {
                                 print('textAndImageInput $e');
                                 Fluttertoast.showToast(msg: "$e");
 
@@ -171,10 +195,12 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                                 });
                               });
                             },
-                            child: Text(
+                            icon: Icon(Icons.check),
+                            label: Text(
                               "Submit",
-                              style: regularTitleStyles.merge(
-                                TextStyle(color: Colors.white),
+                              style: TextStyle(
+                                fontFamily: 'Poppins',
+                                fontSize: 16,
                               ),
                             ),
                           ),
@@ -221,6 +247,22 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
               ),
             ),
           ),
+          if (!isConnected)
+            Positioned(
+              top: 20,
+              left: 0,
+              right: 0,
+              child: Container(
+                color: Colors.red,
+                padding: EdgeInsets.all(8.0),
+                child: Center(
+                  child: Text(
+                    "No internet connection. Image will be saved locally.",
+                    style: TextStyle(color: Colors.black),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -245,4 +287,32 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       },
     );
   }
+
+
+
+  Future<String?> saveImageLocally(XFile imageFile) async {
+    try {
+      // Get the local app directory path using path_provider
+      final directory = await getApplicationDocumentsDirectory();
+      final imagePath = '${directory.path}/${DateTime.now().millisecondsSinceEpoch}.jpg';
+
+      // Ensure directory exists
+      await Directory(directory.path).create(recursive: true);
+
+      // Read the file as bytes
+      final bytes = await imageFile.readAsBytes();
+
+      // Write the bytes to a new file
+      final file = File(imagePath);
+      await file.writeAsBytes(bytes);
+
+      return imagePath;
+    } catch (e) {
+      print('Error saving image locally: $e');
+      return null;
+    }
+  }
+
+
+
 }

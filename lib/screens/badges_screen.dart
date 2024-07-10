@@ -29,6 +29,9 @@ class _BadgesScreenState extends State<BadgesScreen> {
       _badges = [
         CustomBadge(name: 'Explorer', description: 'Scan 50 unique animals!'),
         CustomBadge(name: 'Conservationist', description: 'Favorite 10 endangered species!'),
+        CustomBadge(name: '5 Animals', description: 'Scan 5 unique animals!'),
+        CustomBadge(name: '10 Baby!', description: 'Scan 10 unique animals!'),
+        CustomBadge(name: '25 Animals Found', description: 'Scan 25 unique animals!'),
         CustomBadge(name: 'Habitat Specialist', description: 'Scan animals from 5 different habitats!'),
         CustomBadge(name: 'Rarity Hunter', description: 'Scan 5 exceptional rarity animals!'),
         CustomBadge(name: 'Photographer', description: 'Upload 10 animal photos!'),
@@ -98,16 +101,16 @@ class _BadgesScreenState extends State<BadgesScreen> {
           : Column(
         children: [
           Padding(
-            padding: const EdgeInsets.all(2.0),
+            padding: const EdgeInsets.all(8.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text('Show Earned'),
-                Checkbox(
+                Text(_showOnlyEarned ? "Show All" : 'Show Earned', style: TextStyle(fontSize: 16)),
+                Switch(
                   value: _showOnlyEarned,
                   onChanged: (value) {
                     setState(() {
-                      _showOnlyEarned = value!;
+                      _showOnlyEarned = value;
                     });
                   },
                 ),
@@ -132,10 +135,18 @@ class _BadgesScreenState extends State<BadgesScreen> {
 
     return Card(
       margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(10),
+      ),
       child: ListTile(
+        leading: Icon(
+          isEarned ? Icons.emoji_events : Icons.emoji_events_outlined,
+          color: isEarned ? Colors.amber : Colors.grey,
+          size: 40,
+        ),
         title: Text(
           badge.name,
-          style: TextStyle(fontWeight: FontWeight.bold),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
         ),
         subtitle: Text(badge.description),
         trailing: Icon(

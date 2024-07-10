@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:anidex/screens/scan.dart';
 import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,6 +11,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../components/phone_component.dart';
 import '../models/animal_info.dart';
 import '../utils.dart';
+import 'chat.dart';
 
 class AnimalInfo extends StatefulWidget {
   final String capturedImage;
@@ -27,7 +29,7 @@ class AnimalInfo extends StatefulWidget {
 }
 
 class _AnimalInfoState extends State<AnimalInfo> {
-  bool _isUploading = false; // Track if an upload operation is in progress
+  bool _isUploading = false;
 
   @override
   Widget build(BuildContext context) {
@@ -48,8 +50,8 @@ class _AnimalInfoState extends State<AnimalInfo> {
               Navigator.pop(context);
             },
           ),
-          backgroundColor: Colors.blueAccent,
-          elevation: 0, // Remove appbar shadow
+          backgroundColor: primaryColor,
+          elevation: 0,
         ),
         body: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -68,45 +70,31 @@ class _AnimalInfoState extends State<AnimalInfo> {
                       _buildBasicInfoList(),
                       _buildSectionTitle('Physical Description'),
                       _buildInfoParagraph(
-                        widget.animalInfoModel.basicInformation?.physicalDescription ??
-                            'No description available.',
-                        style: GoogleFonts.poppins(fontSize: 16.0),
+                        widget.animalInfoModel.basicInformation?.physicalDescription ?? 'No description available.',
                       ),
                       _buildSectionTitle('Habitat'),
                       _buildInfoParagraph(
-                        widget.animalInfoModel.basicInformation?.habitat ??
-                            'No habitat information available.',
-                        style: GoogleFonts.poppins(fontSize: 16.0),
+                        widget.animalInfoModel.basicInformation?.habitat ?? 'No habitat information available.',
                       ),
                       _buildSectionTitle('Geographic Distribution'),
                       _buildInfoParagraph(
-                        widget.animalInfoModel.basicInformation?.geographicDistribution?.join(', ') ??
-                            'No geographic distribution information available.',
-                        style: GoogleFonts.poppins(fontSize: 16.0),
+                        widget.animalInfoModel.basicInformation?.geographicDistribution?.join(', ') ?? 'No geographic distribution information available.',
                       ),
                       _buildSectionTitle('Behavior'),
                       _buildInfoParagraph(
-                        widget.animalInfoModel.basicInformation?.behavior ??
-                            'No behavior information available.',
-                        style: GoogleFonts.poppins(fontSize: 16.0),
+                        widget.animalInfoModel.basicInformation?.behavior ?? 'No behavior information available.',
                       ),
                       _buildSectionTitle('Diet'),
                       _buildInfoParagraph(
-                        widget.animalInfoModel.basicInformation?.diet ??
-                            'No diet information available.',
-                        style: GoogleFonts.poppins(fontSize: 16.0),
+                        widget.animalInfoModel.basicInformation?.diet ?? 'No diet information available.',
                       ),
                       _buildSectionTitle('Conservation Status'),
                       _buildInfoParagraph(
-                        widget.animalInfoModel.basicInformation?.conservationStatus ??
-                            'No conservation status available.',
-                        style: GoogleFonts.poppins(fontSize: 16.0),
+                        widget.animalInfoModel.basicInformation?.conservationStatus ?? 'No conservation status available.',
                       ),
                       _buildSectionTitle('Interesting Facts'),
                       _buildInterestingFacts(
-                        widget.animalInfoModel.basicInformation?.interestingFacts ??
-                            ['No interesting facts available.'],
-                        style: GoogleFonts.poppins(fontSize: 16.0),
+                        widget.animalInfoModel.basicInformation?.interestingFacts ?? ['No interesting facts available.'],
                       ),
                       SizedBox(height: 16.0),
                     ],
@@ -114,7 +102,7 @@ class _AnimalInfoState extends State<AnimalInfo> {
                 ),
               ),
               Container(
-                margin: EdgeInsets.only(bottom: 16.0),
+                margin: EdgeInsets.only(bottom: 8.0),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(20.0),
@@ -123,7 +111,7 @@ class _AnimalInfoState extends State<AnimalInfo> {
                       color: Colors.grey.withOpacity(0.5),
                       spreadRadius: 1,
                       blurRadius: 7,
-                      offset: Offset(0, 3), // changes position of shadow
+                      offset: Offset(0, 3),
                     ),
                   ],
                 ),
@@ -152,7 +140,7 @@ class _AnimalInfoState extends State<AnimalInfo> {
             color: Colors.grey.withOpacity(0.5),
             spreadRadius: 2,
             blurRadius: 7,
-            offset: Offset(0, 3), // changes position of shadow
+            offset: Offset(0, 3),
           ),
         ],
       ),
@@ -167,7 +155,7 @@ class _AnimalInfoState extends State<AnimalInfo> {
         style: GoogleFonts.poppins(
           fontSize: 18.0,
           fontWeight: FontWeight.bold,
-          color: Colors.blueAccent,
+          color: primaryColor,
         ),
       ),
     );
@@ -216,37 +204,37 @@ class _AnimalInfoState extends State<AnimalInfo> {
     );
   }
 
-  Widget _buildInfoParagraph(String text, {TextStyle? style}) {
+  Widget _buildInfoParagraph(String text) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Text(
         text,
         textAlign: TextAlign.justify,
-        style: style ?? GoogleFonts.poppins(fontSize: 16.0),
+        style: GoogleFonts.poppins(fontSize: 16.0),
       ),
     );
   }
 
-  Widget _buildInterestingFacts(List<String> facts, {TextStyle? style}) {
+  Widget _buildInterestingFacts(List<String> facts) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: facts.map((fact) => _buildInfoBullet(fact, style: style)).toList(),
+      children: facts.map((fact) => _buildInfoBullet(fact)).toList(),
     );
   }
 
-  Widget _buildInfoBullet(String text, {TextStyle? style}) {
+  Widget _buildInfoBullet(String text) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 4.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.arrow_right, color: Colors.blueAccent),
+          Icon(Icons.arrow_right, color: primaryColor),
           SizedBox(width: 8.0),
           Expanded(
             child: Text(
               text,
               textAlign: TextAlign.justify,
-              style: style ?? GoogleFonts.poppins(fontSize: 16.0),
+              style: GoogleFonts.poppins(fontSize: 16.0),
             ),
           ),
         ],
@@ -262,31 +250,66 @@ class _AnimalInfoState extends State<AnimalInfo> {
         child: CircularProgressIndicator(),
       ),
     )
-        : ElevatedButton(
-      onPressed: () {
-        _uploadScanAndUpdateUser();
-      },
-      style: ButtonStyle(
-        backgroundColor: MaterialStateProperty.all<Color>(Colors.blueAccent),
-        shape: MaterialStateProperty.all<OutlinedBorder>(
-          RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20.0),
-          ),
-        ),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
-        child: Text(
-          'Save Scan',
-          style: GoogleFonts.poppins(
-            fontSize: 18.0,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-      ),
-    );
+        : Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            Expanded( 
+              child: ElevatedButton(
+                onPressed: (){
+                  scannedAnimal = widget.animalInfoModel.basicInformation!.commonName!;
+                  Navigator.push(context, MaterialPageRoute(builder: (context){
+                    return ChatScreen(animalName: widget.animalInfoModel.basicInformation!.commonName!);
+                  }));
+                },
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(primaryColor),
+                  shape: MaterialStateProperty.all<OutlinedBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
+                    ),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Text(
+                    'Talk to ${widget.animalInfoModel.basicInformation!.commonName}',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            widget.isInfo ? Container(): Expanded(
+              child: ElevatedButton(
+                    onPressed: _uploadScanAndUpdateUser,
+                    style: ButtonStyle(
+              backgroundColor: MaterialStateProperty.all<Color>(primaryColor),
+              shape: MaterialStateProperty.all<OutlinedBorder>(
+                RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20.0),
+                ),
+              ),
+                    ),
+                    child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 16.0),
+              child: Text(
+                'Save Scan',
+                style: GoogleFonts.poppins(
+                  fontSize: 12.0,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+                    ),
+                  ),
+            ),
+          ],
+        );
   }
+
 
   Future<void> _uploadScanAndUpdateUser() async {
     setState(() {
@@ -335,11 +358,14 @@ class _AnimalInfoState extends State<AnimalInfo> {
       }
 
       // Other badge checks can be added here
-      if (userScans.length + 1 >= 5 && !userBadges.contains('Night Watcher')) {
-        earnedBadges.add('Night Watcher');
+      if (userScans.length + 1 >= 5 && !userBadges.contains('5 Animals')) {
+        earnedBadges.add('5 Animals');
       }
-      if (userScans.length + 1 >= 20 && !userBadges.contains('Marine Explorer')) {
-        earnedBadges.add('Marine Explorer');
+      if (userScans.length + 1 >= 10 && !userBadges.contains('10 Baby!')) {
+        earnedBadges.add('10 Baby!');
+      }
+      if (userScans.length + 1 >= 25 && !userBadges.contains('25 Animals Found')) {
+        earnedBadges.add('25 Animals Found');
       }
       // Add more badge checks based on your requirements
 

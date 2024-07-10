@@ -133,13 +133,12 @@ class FavoritesListView extends StatelessWidget {
 
                 return Padding(
                   padding: const EdgeInsets.only(bottom: 16.0),
-                  child: Card(
-                    elevation: 4.0,
+                  child:Card(
+                    elevation: 4,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Container(
-                      padding: EdgeInsets.all(16.0),
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
                         gradient: gradient,
@@ -147,59 +146,70 @@ class FavoritesListView extends StatelessWidget {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          Padding(
+                            padding: const EdgeInsets.all(12.0),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Container(
+                                  padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(15),
+                                    color: Colors.white,
+                                  ),
+                                  child: Text(
+                                    rarityText,
+                                    style: TextStyle(fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                SizedBox(height: 8),
+                                Text(
+                                  basicInfo['commonName'],
+                                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                ),
+                                SizedBox(height: 8),
+                                Row(
+                                  children: [
+                                    Image(image: AssetImage(typeImage), height: 30, width: 30),
+                                    SizedBox(width: 8),
+                                    Text(type ?? "Unknown type"),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                          Stack(
                             children: [
                               Container(
+                                width: 126,
+                                height: 102,
                                 decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.all(Radius.circular(15)),
-                                  color: Colors.white,
+                                  color: bgColor,
+                                  borderRadius: BorderRadius.all(Radius.circular(20)),
                                 ),
-                                child: Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                                  child: Text(rarityText),
-                                ),
-                              ),
-                              SizedBox(height: 8.0),
-                              Text(
-                                basicInfo['commonName'],
-                                style: TextStyle(
-                                  fontSize: 18.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                ),
-                              ),
-                              SizedBox(height: 8.0),
-                              Row(
-                                children: [
-                                  Image.asset(
-                                    typeImage,
-                                    height: 30,
-                                    width: 30,
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.all(Radius.circular(20)),
+                                  child: Image.network(
+                                    imagePath,
                                     fit: BoxFit.cover,
+                                    loadingBuilder: (BuildContext context, Widget child,
+                                        ImageChunkEvent? loadingProgress) {
+                                      if (loadingProgress == null) return child;
+                                      return Center(
+                                        child: CircularProgressIndicator(
+                                          value: loadingProgress.expectedTotalBytes != null
+                                              ? loadingProgress.cumulativeBytesLoaded /
+                                              (loadingProgress.expectedTotalBytes ?? 1)
+                                              : null,
+                                        ),
+                                      );
+                                    },
                                   ),
-                                  SizedBox(width: 8.0),
-                                  Text(
-                                    type ?? "Unknown type",
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
+                                ),
                               ),
+
+
                             ],
-                          ),
-                          Container(
-                            width: 100,
-                            height: 100,
-                            decoration: BoxDecoration(
-                              color: bgColor,
-                              borderRadius: BorderRadius.all(Radius.circular(20)),
-                              image: DecorationImage(
-                                image: NetworkImage(imagePath),
-                                fit: BoxFit.cover,
-                              ),
-                            ),
                           ),
                         ],
                       ),

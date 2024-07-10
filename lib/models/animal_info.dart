@@ -28,7 +28,7 @@ class BasicInformation {
   List<String>? geographicDistribution;
   String? behavior;
   String? diet;
-  int? rarity;
+  dynamic rarity;
   String? type;
   String? conservationStatus;
   List<String>? interestingFacts;

@@ -126,6 +126,9 @@ class _ProfilePageState extends State<ProfilePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Text('Profile'),
+      ),
       body: _user == null
           ? Center(
         child: Column(
@@ -142,78 +145,74 @@ class _ProfilePageState extends State<ProfilePage> {
       )
           : Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                InkWell(
-                  onTap: _isEditing ? _pickProfilePicture : null,
-                  child: Stack(
-                    children: [
-                      CircleAvatar(
-                        radius: 50,
-                        backgroundImage: _profilePicUrl.isNotEmpty
-                            ? NetworkImage(_profilePicUrl)
-                            : NetworkImage(
-                            'https://picsum.photos/200/300') as ImageProvider,
-                      ),
-                      if (_isUpdating)
-                        Positioned.fill(
-                          child: Container(
-                            color: Colors.black45,
-                            child: Center(
-                              child: CircularProgressIndicator(),
-                            ),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              InkWell(
+                onTap: _isEditing ? _pickProfilePicture : null,
+                child: Stack(
+                  children: [
+                    CircleAvatar(
+                      radius: 50,
+                      backgroundImage: _profilePicUrl.isNotEmpty
+                          ? NetworkImage(_profilePicUrl)
+                          : NetworkImage('https://picsum.photos/200/300')
+                      as ImageProvider,
+                    ),
+                    if (_isUpdating)
+                      Positioned.fill(
+                        child: Container(
+                          color: Colors.black45,
+                          child: Center(
+                            child: CircularProgressIndicator(),
                           ),
                         ),
-                    ],
-                  ),
+                      ),
+                  ],
                 ),
-              ],
-            ),
-            TextField(
-              controller: _firstNameController,
-              decoration: InputDecoration(labelText: 'First Name'),
-              readOnly: !_isEditing,
-            ),
-            TextField(
-              controller: _lastNameController,
-              decoration: InputDecoration(labelText: 'Last Name'),
-              readOnly: !_isEditing,
-            ),
-            TextField(
-              controller: _phoneNumberController,
-              decoration: InputDecoration(labelText: 'Phone Number'),
-              readOnly: true,
-            ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _isEditing
-                    ? ElevatedButton(
-                  onPressed: _updateUserProfile,
-                  child: Text('Save'),
-                )
-                    : ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _isEditing = true;
-                    });
-                  },
-                  child: Text('Edit'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    _logout();
-                  },
-                  child: Text("Logout"),
-                )
-              ],
-            ),
-          ],
+              ),
+              SizedBox(height: 20),
+              TextField(
+                controller: _firstNameController,
+                decoration: InputDecoration(labelText: 'First Name'),
+                readOnly: !_isEditing,
+              ),
+              SizedBox(height: 10),
+              TextField(
+                controller: _lastNameController,
+                decoration: InputDecoration(labelText: 'Last Name'),
+                readOnly: !_isEditing,
+              ),
+              SizedBox(height: 10),
+              TextField(
+                controller: _phoneNumberController,
+                decoration: InputDecoration(labelText: 'Phone Number'),
+                readOnly: true,
+              ),
+              SizedBox(height: 20),
+              _isEditing
+                  ? ElevatedButton(
+                onPressed: _updateUserProfile,
+                child: Text('Save'),
+              )
+                  : ElevatedButton(
+                onPressed: () {
+                  setState(() {
+                    _isEditing = true;
+                  });
+                },
+                child: Container(child: Center(child: Text('Edit'))),
+              ),
+              SizedBox(height: 10),
+              ElevatedButton(
+                onPressed: _logout,
+                child: Container(
+                    width: double.infinity,
+                    child: Center(child: Text('Logout'))),
+              ),
+            ],
+          ),
         ),
       ),
     );

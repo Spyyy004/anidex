@@ -16,13 +16,14 @@ class LeaderboardScreen extends StatelessWidget {
       leaderboard.add({
         'username': userDoc['firstName'], // Ensure the username field exists in your user documents
         'scanCount': scanCount,
-        'profilePic':userDoc['profilePic']
+        'profilePic': userDoc['profilePic']
       });
     }
 
     leaderboard.sort((a, b) => b['scanCount'].compareTo(a['scanCount']));
     return leaderboard;
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -48,31 +49,61 @@ class LeaderboardScreen extends StatelessWidget {
             child: Column(
               children: [
                 Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
-                    LeaderboardStack(userName: leaderboard[2]['username'],img: leaderboard[2]['profilePic'] ?? "https://picsum.photos/200/300",height: 60,points: leaderboard[2]['scanCount'].toString(),),
-                    LeaderboardStack(userName: leaderboard[0]['username'],img: leaderboard[0]['profilePic'] ?? "https://picsum.photos/200/300",height: 100,points: leaderboard[0]['scanCount'].toString(),),
-                    LeaderboardStack(userName: leaderboard[1]['username'],img: leaderboard[1]['profilePic'] ?? "https://picsum.photos/200/300",height: 80,points: leaderboard[1]['scanCount'].toString(),),
+                    if (leaderboard.length > 2)
+                      LeaderboardStack(
+                        userName: leaderboard[2]['username'],
+                        img: leaderboard[2]['profilePic'] ?? "https://picsum.photos/200/300",
+                        height: 80,
+                        points: leaderboard[2]['scanCount'].toString(),
+                      ),
+                    if (leaderboard.isNotEmpty)
+                      LeaderboardStack(
+                        userName: leaderboard[0]['username'],
+                        img: leaderboard[0]['profilePic'] ?? "https://picsum.photos/200/300",
+                        height: 100,
+                        points: leaderboard[0]['scanCount'].toString(),
+                      ),
+                    if (leaderboard.length > 1)
+                      LeaderboardStack(
+                        userName: leaderboard[1]['username'],
+                        img: leaderboard[1]['profilePic'] ?? "https://picsum.photos/200/300",
+                        height: 90,
+                        points: leaderboard[1]['scanCount'].toString(),
+                      ),
                   ],
                 ),
-                ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: leaderboard.length,
-                  itemBuilder: (context, index) {
-                    var user = leaderboard[index];
-                    if(index > 2){
-                      return ListTile(
-                        leading: CircleAvatar(
-                            child: index <= 2 ? Image(image: AssetImage("assets/${index+1}th.png")) : Text("${index+1}")
-                        ),
-                        title: Text(user['username']),
-                        trailing: Text('Scans: ${user['scanCount']}'),
-                      );
-                    }
-                    else{
-                      return Container();
-                    }
-                  },
+                Expanded(
+                  child: ListView.builder(
+                    itemCount: leaderboard.length,
+                    itemBuilder: (context, index) {
+                      if (index > 2) {
+                        var user = leaderboard[index];
+                        return Card(
+                          elevation: 2,
+                          margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                          child: ListTile(
+                            leading: CircleAvatar(
+                              backgroundImage: NetworkImage(user['profilePic'] ?? "https://picsum.photos/200/300"),
+                              child: index <= 2 ? Image(image: AssetImage("assets/${index + 1}th.png")) : null,
+                            ),
+                            title: Text(
+                              user['username'],
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                            trailing: Text(
+                              'Scans: ${user['scanCount']}',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        );
+                      } else {
+                        return Container();
+                      }
+                    },
+                  ),
                 ),
               ],
             ),
