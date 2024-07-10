@@ -6,7 +6,7 @@ Anidex is a Pokedex-style Flutter application designed for exploring and learnin
 
 1. **Scan and Identify Animals**: Use the camera to scan animals in real-time and receive detailed information about them.
 
-2. **Talk to Animals**; Talk to animals and know more about their lifestyle in their own words.
+2. **Talk to Animals**: Talk to animals and know more about their lifestyle in their own words.
    
 3. **Offline Scanning**: Scan animals even without an internet connection, with locally stored data for seamless offline access.
    
@@ -20,4 +20,4 @@ Anidex is a Pokedex-style Flutter application designed for exploring and learnin
 
 
 ## Contact
-For questions or feedback, please reach out to i.yush.004@example.com.
+For questions or feedback, please reach out to i.yush.004@gmail.com.
