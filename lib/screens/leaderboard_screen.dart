@@ -27,10 +27,7 @@ class LeaderboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Leaderboard'),
-        centerTitle: true,
-      ),
+
       body: FutureBuilder<List<Map<String, dynamic>>>(
         future: _fetchLeaderboard(),
         builder: (context, snapshot) {
@@ -45,7 +42,7 @@ class LeaderboardScreen extends StatelessWidget {
           List<Map<String, dynamic>> leaderboard = snapshot.data!;
 
           return Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: const EdgeInsets.all(12.0),
             child: Column(
               children: [
                 Row(
@@ -56,7 +53,7 @@ class LeaderboardScreen extends StatelessWidget {
                       LeaderboardStack(
                         userName: leaderboard[2]['username'],
                         img: leaderboard[2]['profilePic'] ?? "https://picsum.photos/200/300",
-                        height: 80,
+                        height: 60,
                         points: leaderboard[2]['scanCount'].toString(),
                       ),
                     if (leaderboard.isNotEmpty)
@@ -70,7 +67,7 @@ class LeaderboardScreen extends StatelessWidget {
                       LeaderboardStack(
                         userName: leaderboard[1]['username'],
                         img: leaderboard[1]['profilePic'] ?? "https://picsum.photos/200/300",
-                        height: 90,
+                        height: 80,
                         points: leaderboard[1]['scanCount'].toString(),
                       ),
                   ],
@@ -83,7 +80,7 @@ class LeaderboardScreen extends StatelessWidget {
                         var user = leaderboard[index];
                         return Card(
                           elevation: 2,
-                          margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+                          margin: EdgeInsets.symmetric(vertical: 8, horizontal: 0),
                           child: ListTile(
                             leading: CircleAvatar(
                               backgroundImage: NetworkImage(user['profilePic'] ?? "https://picsum.photos/200/300"),

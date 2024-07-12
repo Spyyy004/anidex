@@ -7,86 +7,41 @@ import 'package:fluttertoast/fluttertoast.dart'; // Import your badges screen
 class LibraryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Library'),
-        centerTitle: true,
-      ),
-      body: GridView.count(
-        crossAxisCount: 2,
-        children: [
-          _buildCard(
-            context,
-            title: 'Leaderboard',
-            icon: Icons.leaderboard,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => LeaderboardScreen()),
-              );
-            },
-          ),
-          _buildCard(
-            context,
-            title: 'Badges',
-            icon: Icons.badge,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => BadgesScreen()),
-              );
-            },
-          ),
-          _buildCard(
-            context,
-            title: 'Encyclopedia',
-            icon: Icons.book,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) => AllScansListPage()),
-              );
-            },
-          ),
-          _buildCard(
-            context,
-            title: 'Trivia Time',
-            icon: Icons.search,
-            onTap: () {
-              Fluttertoast.showToast(msg: "Coming Soon!");
-            },
-          ),
-        ],
-      ),
-    );
-  }
+    return DefaultTabController(
+      length: 3, // Number of tabs
+      child: Scaffold(
+        appBar: AppBar(
+          title: TabBar(
 
-  Widget _buildCard(BuildContext context, {required String title, required IconData icon, required VoidCallback onTap}) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Card(
-        elevation: 4,
-        margin: EdgeInsets.all(16),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(15),
-        ),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 48,
-                color: Theme.of(context).primaryColor,
-              ),
-              SizedBox(height: 16),
-              Text(
-                title,
-                style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                textAlign: TextAlign.center,
-              ),
+            tabs: [
+              Tab(
+                  iconMargin: EdgeInsets.symmetric(vertical: 8.0),
+                  icon: Icon(Icons.search), text: 'Explore'),
+              Tab(
+                  iconMargin: EdgeInsets.symmetric(vertical: 8.0),
+
+                  icon: Icon(Icons.leaderboard), text: 'Leaderboard'),
+              Tab(
+                  iconMargin: EdgeInsets.symmetric(vertical: 8.0),
+
+                  icon: Icon(Icons.badge), text: 'Badges'),
+
             ],
           ),
+        ),
+        body: TabBarView(
+          children: [
+            AllScansListPage(),
+            LeaderboardScreen(), // Your leaderboard screen
+            BadgesScreen(), // Your badges screen
+             // Your explore screen
+            // Center(
+            //   child: Text(
+            //     'Trivia Time - Coming Soon!',
+            //     style: TextStyle(fontSize: 24),
+            //   ),
+            // ),
+          ],
         ),
       ),
     );

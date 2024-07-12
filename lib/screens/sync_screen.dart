@@ -31,19 +31,12 @@ class _SyncDataPageState extends State<SyncDataPage> {
 
   Future<void> _loadLocalScans() async {
     try {
-      // Get the local app directory path using path_provider
       final directory = await getApplicationDocumentsDirectory();
-
-      // Ensure the directory exists
       if (!await Directory(directory.path).exists()) {
         print('Directory does not exist: ${directory.path}');
         return;
       }
-
-      // Fetch local scans
       List<LocalScanItem> scans = await fetchLocalScans(directory.path);
-
-      // Update the state with the fetched scans
       setState(() {
         localScans = scans;
       });
@@ -57,17 +50,13 @@ class _SyncDataPageState extends State<SyncDataPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Sync Data'),
+
       ),
       body: localScans.isNotEmpty
-          ? FutureBuilder<void>(
-        future: _loadLocalScans(),
-        builder: (context, snapshot) {
-          return ListView.builder(
-            itemCount: localScans.length,
-            itemBuilder: (context, index) {
-              return _buildListItem(localScans[index]);
-            },
-          );
+          ? ListView.builder(
+        itemCount: localScans.length,
+        itemBuilder: (context, index) {
+          return _buildListItem(localScans[index]);
         },
       )
           : Center(
@@ -84,21 +73,20 @@ class _SyncDataPageState extends State<SyncDataPage> {
         duration: Duration(milliseconds: 500),
         child: ListTile(
           leading: Image.file(File(scanItem.imagePath)),
-          title: Text(scanItem.imagePath.split('/').last), // Display file name
+          title: Text(
+            scanItem.imagePath.split('/').last,
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
                 icon: Icon(Icons.check),
-                onPressed: () {
-                  _submitScan(scanItem);
-                },
+                onPressed: scanItem.isSubmitted ? null : () => _submitScan(scanItem),
               ),
               IconButton(
                 icon: Icon(Icons.delete),
-                onPressed: () {
-                  _deleteScan(scanItem);
-                },
+                onPressed: () => _confirmDelete(scanItem),
               ),
             ],
           ),
@@ -109,11 +97,9 @@ class _SyncDataPageState extends State<SyncDataPage> {
 
   Future<List<LocalScanItem>> fetchLocalScans(String directoryPath) async {
     List<LocalScanItem> localScans = [];
-
     try {
       Directory directory = Directory(directoryPath);
       List<FileSystemEntity> files = directory.listSync();
-
       for (var file in files) {
         if (file is File) {
           localScans.add(LocalScanItem(imagePath: file.path));
@@ -122,7 +108,6 @@ class _SyncDataPageState extends State<SyncDataPage> {
     } catch (e) {
       print('Error fetching local scans: $e');
     }
-
     return localScans;
   }
 
@@ -131,12 +116,9 @@ class _SyncDataPageState extends State<SyncDataPage> {
       scanItem.isSubmitted = true;
     });
 
-    print('Submitting scan: ${scanItem.imagePath}');
-    // Implement logic to submit scan (e.g., API call)
-    // After submission, you might want to delete the local scan
     Fluttertoast.showToast(msg: "Sync in progress. Please wait");
 
-    final prompt = "your_prompt_here"; // Ensure the prompt is defined
+     // Ensure the prompt is defined
 
     gemini
         .textAndImage(
@@ -172,12 +154,47 @@ class _SyncDataPageState extends State<SyncDataPage> {
     });
   }
 
+  void _confirmDelete(LocalScanItem scanItem) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Delete Scan"),
+          content: Text("Are you sure you want to delete this scan?"),
+          actions: [
+            TextButton(
+              child: Text("Cancel"),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+            TextButton(
+              child: Text("Delete"),
+              onPressed: () {
+                Navigator.of(context).pop();
+                _deleteScan(scanItem);
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _deleteScan(LocalScanItem scanItem) {
     try {
       File(scanItem.imagePath).deleteSync();
-      _loadLocalScans(); // Reload the list after deletion
+      _loadLocalScans();
     } catch (e) {
       print('Error deleting scan: $e');
+    }
+  }
+
+  void _syncAllScans() {
+    for (var scanItem in localScans) {
+      if (!scanItem.isSubmitted) {
+        _submitScan(scanItem);
+      }
     }
   }
 }

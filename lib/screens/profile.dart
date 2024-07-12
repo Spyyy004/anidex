@@ -1,10 +1,10 @@
 import 'dart:io';
-
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../components/phone_component.dart';
 
@@ -127,23 +127,39 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile'),
+        title: Text(
+          'Profile',
+          style: GoogleFonts.poppins(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       body: _user == null
           ? Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Please log in to view your profile details.'),
+            Text(
+              'Please log in to view your profile details.',
+              style: GoogleFonts.poppins(fontSize: 16),
+            ),
             SizedBox(height: 20),
             ElevatedButton(
               onPressed: _showLoginModal,
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white, backgroundColor: Theme.of(context).primaryColor,
+                padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              ),
               child: Text('Log In'),
             ),
           ],
         ),
       )
-          : Padding(
+          : Container(
+        decoration: BoxDecoration(
+
+        ),
         padding: const EdgeInsets.all(16.0),
         child: SingleChildScrollView(
           child: Column(
@@ -175,25 +191,59 @@ class _ProfilePageState extends State<ProfilePage> {
               SizedBox(height: 20),
               TextField(
                 controller: _firstNameController,
-                decoration: InputDecoration(labelText: 'First Name'),
+                decoration: InputDecoration(
+                  labelText: 'First Name',
+                  labelStyle: TextStyle(color: Colors.black),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black),
+                  ),
+                ),
+                style: TextStyle(color: Colors.black),
                 readOnly: !_isEditing,
               ),
               SizedBox(height: 10),
               TextField(
                 controller: _lastNameController,
-                decoration: InputDecoration(labelText: 'Last Name'),
+                decoration: InputDecoration(
+                  labelText: 'Last Name',
+                  labelStyle: TextStyle(color: Colors.black),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black),
+                  ),
+                ),
+                style: TextStyle(color: Colors.black),
                 readOnly: !_isEditing,
               ),
               SizedBox(height: 10),
               TextField(
                 controller: _phoneNumberController,
-                decoration: InputDecoration(labelText: 'Phone Number'),
+                decoration: InputDecoration(
+                  labelText: 'Phone Number',
+                  labelStyle: TextStyle(color: Colors.black),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide: BorderSide(color: Colors.black),
+                  ),
+                ),
+                style: TextStyle(color: Colors.black),
                 readOnly: true,
               ),
               SizedBox(height: 20),
               _isEditing
                   ? ElevatedButton(
                 onPressed: _updateUserProfile,
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white, backgroundColor: Theme.of(context).primaryColor,
+                  padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                ),
                 child: Text('Save'),
               )
                   : ElevatedButton(
@@ -202,14 +252,23 @@ class _ProfilePageState extends State<ProfilePage> {
                     _isEditing = true;
                   });
                 },
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white, backgroundColor: Theme.of(context).primaryColor,
+                  padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                ),
                 child: Container(child: Center(child: Text('Edit'))),
               ),
               SizedBox(height: 10),
               ElevatedButton(
                 onPressed: _logout,
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white, backgroundColor: Colors.red,
+                  padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                ),
                 child: Container(
-                    width: double.infinity,
-                    child: Center(child: Text('Logout'))),
+                  width: double.infinity,
+                  child: Center(child: Text('Logout')),
+                ),
               ),
             ],
           ),

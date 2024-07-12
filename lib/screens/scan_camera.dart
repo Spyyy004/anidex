@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -6,11 +7,14 @@ import 'package:anidex/screens/animal_info.dart';
 import 'package:anidex/utils.dart';
 import 'package:camera/camera.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
+
+import '../components/phone_component.dart';
 
 class CameraExampleHome extends StatefulWidget {
   const CameraExampleHome({Key? key}) : super(key: key);
@@ -26,12 +30,19 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   late List<CameraDescription> _cameras;
   bool showLoader = false;
   bool showButtons = false;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   XFile? capturedImage; // Variable to store captured image path
 
   AnimationController? _captureAnimationController;
   Animation<double>? _captureAnimation;
 
   bool isConnected = true; // Flag to track internet connectivity
+  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
+
+  double _currentScale = 1.0; // Variable to store current zoom level
+  double _baseScale = 1.0; // Variable to store initial zoom level
+
+  bool isFlashOn = false; // Flag to track flash status
 
   @override
   void initState() {
@@ -47,6 +58,11 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     );
     _captureAnimation = Tween<double>(begin: 1.0, end: 0.8)
         .animate(_captureAnimationController!);
+
+    // Listen for connectivity changes
+    _connectivitySubscription = Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
+      _updateConnectivityStatus(result);
+    });
   }
 
   @override
@@ -54,6 +70,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     WidgetsBinding.instance!.removeObserver(this);
     controller.dispose();
     _captureAnimationController!.dispose();
+    _connectivitySubscription.cancel();
     super.dispose();
   }
 
@@ -68,9 +85,24 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
 
   Future<void> _checkConnectivity() async {
     var connectivityResult = await Connectivity().checkConnectivity();
+    _updateConnectivityStatus(connectivityResult);
+  }
+
+  void _updateConnectivityStatus(List<ConnectivityResult> result) {
     setState(() {
-      isConnected = connectivityResult[0] != ConnectivityResult.none;
+      isConnected = result[0] != ConnectivityResult.none;
     });
+    if (!isConnected) {
+      Fluttertoast.showToast(
+        msg: "No internet connection. Image will be saved locally.",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
   }
 
   @override
@@ -93,7 +125,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                       SizedBox(height: 16),
                       Text(
                         "Hang on! Fetching animal details.",
-                        style: header3Styles,
+                        style: titleStyles,
                       ),
                     ],
                   ),
@@ -101,7 +133,40 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                     : Column(
                   children: [
                     Expanded(
-                      child: CameraPreview(controller),
+                      child: GestureDetector(
+                        onScaleStart: (details) {
+                          _baseScale = _currentScale;
+                        },
+                        onScaleUpdate: (details) async {
+                          setState(() {
+                            _currentScale = _baseScale * details.scale;
+                          });
+                          final x = await controller.getMaxZoomLevel();
+
+                          controller.setZoomLevel(_currentScale.clamp(1.0,x));
+                        },
+                        child: Stack(
+                          children: [
+                            CameraPreview(controller),
+                            if (!showLoader && capturedImage != null)
+                              Positioned(
+                                bottom: 120.0,
+                                left: 20.0,
+                                child: Container(
+                                  height: 100.0,
+                                  width: 100.0,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(10.0),
+                                    image: DecorationImage(
+                                      image: FileImage(File(capturedImage!.path)),
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
                     ),
                     SizedBox(height: 16),
                     if (showButtons)
@@ -136,7 +201,6 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                             onPressed: () async {
                               if (!isConnected) {
                                 final x = await saveImageLocally(capturedImage!);
-
                                 print(x);
                                 Fluttertoast.showToast(
                                     msg: "Image saved locally. Data will be synced when internet is back.");
@@ -158,9 +222,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                                 images: [file.readAsBytesSync()],
                               )
                                   .then((value) {
-
-                                final jsonString = value!.content!.parts!.last.text
-                                    .toString();
+                                final jsonString = value!.content!.parts!.last.text.toString();
                                 final animalInfo = AnimalInfoModel.fromJson(jsonDecode(jsonString));
                                 if (animalInfo.basicInformation!.commonName == "NA") {
                                   Fluttertoast.showToast(msg: "No animal found");
@@ -213,28 +275,13 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
               }
             },
           ),
-          if (!showLoader && capturedImage != null)
-            Positioned(
-              bottom: 120.0,
-              left: 20.0,
-              child: Container(
-                height: 100.0,
-                width: 100.0,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(10.0),
-                  image: DecorationImage(
-                    image: FileImage(File(capturedImage!.path)),
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              ),
-            ),
-          Positioned(
+          showLoader ? Container() :   Positioned(
             bottom: 120.0,
-            right: 20.0,
+            right: MediaQuery.of(context).size.width /2.35,
             child: ScaleTransition(
               scale: _captureAnimation!,
               child: FloatingActionButton(
+
                 child: const Icon(Icons.camera_alt),
                 onPressed: () async {
                   _captureAnimationController!.forward();
@@ -245,6 +292,19 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                   setState(() {});
                 },
               ),
+            ),
+          ),
+         showLoader ? Container() : Positioned(
+            top: 20.0,
+            right: 20.0,
+            child: FloatingActionButton(
+              onPressed: () {
+                setState(() {
+                  isFlashOn = !isFlashOn;
+                  controller.setFlashMode(isFlashOn ? FlashMode.torch : FlashMode.off);
+                });
+              },
+              child: Icon(isFlashOn ? Icons.flash_on : Icons.flash_off),
             ),
           ),
           if (!isConnected)
@@ -288,8 +348,6 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     );
   }
 
-
-
   Future<String?> saveImageLocally(XFile imageFile) async {
     try {
       // Get the local app directory path using path_provider
@@ -312,7 +370,5 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       return null;
     }
   }
-
-
-
 }
+

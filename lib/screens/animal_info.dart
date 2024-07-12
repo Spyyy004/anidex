@@ -30,7 +30,8 @@ class AnimalInfo extends StatefulWidget {
 
 class _AnimalInfoState extends State<AnimalInfo> {
   bool _isUploading = false;
-
+  bool uploadSuccess = false;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -284,27 +285,46 @@ class _AnimalInfoState extends State<AnimalInfo> {
             ),
             widget.isInfo ? Container(): Expanded(
               child: ElevatedButton(
-                    onPressed: _uploadScanAndUpdateUser,
-                    style: ButtonStyle(
-              backgroundColor: MaterialStateProperty.all<Color>(primaryColor),
-              shape: MaterialStateProperty.all<OutlinedBorder>(
-                RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20.0),
-                ),
-              ),
-                    ),
-                    child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 16.0),
-              child: Text(
-                'Save Scan',
-                style: GoogleFonts.poppins(
-                  fontSize: 12.0,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
+                onPressed: uploadSuccess ? (){
+                  Fluttertoast.showToast(msg: "Scan already uploaded");
+                } : (){
+                  User? user = FirebaseAuth.instance.currentUser;
+                  if(user == null){
+                    showPhoneNumberLoginModal(context, () {
+                      setState(() {
+                        user = _auth.currentUser;
+                        if (user != null) {
+                          setState(() {});
+                        }
+                      });
+                    });
+
+                  }
+                  else{
+                    _uploadScanAndUpdateUser();
+                  }
+                },
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(primaryColor),
+                  shape: MaterialStateProperty.all<OutlinedBorder>(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20.0),
                     ),
                   ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Text(
+                    'Save Scan',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12.0,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+
             ),
           ],
         );
@@ -379,11 +399,13 @@ class _AnimalInfoState extends State<AnimalInfo> {
       if (earnedBadges.isNotEmpty) {
         Fluttertoast.showToast(msg: "You have earned new badges: ${earnedBadges.join(', ')}");
       }
+
     } catch (e) {
       Fluttertoast.showToast(msg: "Failed to upload scan");
       throw e;
     } finally {
       setState(() {
+        uploadSuccess = true;
         _isUploading = false; // Upload process completed, hide loader
       });
     }

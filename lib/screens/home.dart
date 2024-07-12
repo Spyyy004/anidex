@@ -32,6 +32,7 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   int _selectedIndex = 2; // Start with Scan page
   bool _isConnected = true; // Initially assume connected
+  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
 
   static List<Widget> _widgetOptions = <Widget>[
     ScansListPage(),
@@ -45,18 +46,32 @@ class _MainPageState extends State<MainPage> {
   void initState() {
     super.initState();
     _checkConnectivity();
+    _connectivitySubscription =
+        Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
+          _updateConnectivityStatus(result);
+        });
   }
 
   Future<void> _checkConnectivity() async {
     var connectivityResult = await Connectivity().checkConnectivity();
-    if (connectivityResult[0] == ConnectivityResult.none) {
-      setState(() {
-        _isConnected = false;
-      });
-    } else {
-      setState(() {
-        _isConnected = true;
-      });
+    _updateConnectivityStatus(connectivityResult);
+  }
+
+  void _updateConnectivityStatus(List<ConnectivityResult> result) {
+    setState(() {
+      _isConnected = result[0] != ConnectivityResult.none;
+    });
+    if (!_isConnected && _selectedIndex != 2) {
+      _onItemTapped(2);
+      Fluttertoast.showToast(
+        msg: "Please connect to the internet to access other pages.",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.BOTTOM,
+        timeInSecForIosWeb: 1,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
     }
   }
 
@@ -79,20 +94,28 @@ class _MainPageState extends State<MainPage> {
   }
 
   @override
+  void dispose() {
+    _connectivitySubscription.cancel();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Anidex'),
+        title: Text('Anidex',style: header3Styles,),
       ),
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
         surfaceTintColor: Colors.white,
+
         shape: CircularNotchedRectangle(),
         child: SizedBox(
-          height: 200, // Adjusted height to prevent overflow
+          height: 60, // Adjusted height to prevent overflow
           child: BottomNavigationBar(
-            iconSize: 16,
+            type:BottomNavigationBarType.shifting,
+            iconSize: 12,
             backgroundColor: Colors.white,
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
@@ -124,7 +147,7 @@ class _MainPageState extends State<MainPage> {
               if (index == 2) return;
               _onItemTapped(index);
             },
-            type: BottomNavigationBarType.shifting,
+
           ),
         ),
       ),
@@ -136,8 +159,7 @@ class _MainPageState extends State<MainPage> {
         backgroundColor: primaryColor, // Adjust color as needed
         foregroundColor: Colors.white,
       ),
-      floatingActionButtonLocation:
-      FloatingActionButtonLocation.centerDocked,
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
     );
   }
 }

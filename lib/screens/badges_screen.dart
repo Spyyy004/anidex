@@ -93,9 +93,7 @@ class _BadgesScreenState extends State<BadgesScreen> {
     List<CustomBadge> filteredBadges = getFilteredBadges();
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Badges'),
-      ),
+
       body: _isLoading
           ? Center(child: CircularProgressIndicator()) // Show loading indicator
           : Column(

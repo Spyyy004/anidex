@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+import '../components/phone_component.dart';
 
 class FavoritesPage extends StatelessWidget {
   final FirebaseAuth _auth = FirebaseAuth.instance;
@@ -18,8 +21,14 @@ class FavoritesPage extends StatelessWidget {
   }
 }
 
-class FavoritesListView extends StatelessWidget {
+class FavoritesListView extends StatefulWidget {
+  @override
+  State<FavoritesListView> createState() => _FavoritesListViewState();
+}
+
+class _FavoritesListViewState extends State<FavoritesListView> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
+
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   @override
@@ -28,7 +37,26 @@ class FavoritesListView extends StatelessWidget {
 
     if (user == null) {
       return Center(
-        child: Text('Please log in to view your favorites.'),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Please log in to view your favourite scans',
+              style: GoogleFonts.poppins(fontSize: 16),
+            ),
+            SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: (){
+                _showLoginModal(user);
+              },
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white, backgroundColor: Theme.of(context).primaryColor,
+                padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              ),
+              child: Text('Log In'),
+            ),
+          ],
+        ),
       );
     }
 
@@ -182,7 +210,7 @@ class FavoritesListView extends StatelessWidget {
                             children: [
                               Container(
                                 width: 126,
-                                height: 102,
+                                height: 122,
                                 decoration: BoxDecoration(
                                   color: bgColor,
                                   borderRadius: BorderRadius.all(Radius.circular(20)),
@@ -222,5 +250,16 @@ class FavoritesListView extends StatelessWidget {
         );
       },
     );
+  }
+
+  void _showLoginModal(User? user) {
+    showPhoneNumberLoginModal(context, () {
+      setState(() {
+        user = _auth.currentUser;
+        if (user != null) {
+          setState(() {});
+        }
+      });
+    });
   }
 }

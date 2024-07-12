@@ -1,3 +1,4 @@
+import 'package:anidex/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -113,7 +114,7 @@ class _PhoneNumberLoginModalState extends State<PhoneNumberLoginModal> {
                     borderSide: BorderSide(),
                   ),
                 ),
-                initialCountryCode: 'US', // Set initial country code
+                initialCountryCode: 'IN', // Set initial country code
                 onChanged: (phone) {
                   setState(() {
                     _countryCode = phone.countryCode;
@@ -134,11 +135,15 @@ class _PhoneNumberLoginModalState extends State<PhoneNumberLoginModal> {
             SizedBox(height: 16.0),
             Center(
               child: ElevatedButton(
-
+                style: ButtonStyle(
+                  backgroundColor: MaterialStateProperty.all<Color>(Theme.of(context).primaryColor),
+                  foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
+                ),
                 onPressed: _isOtpSent ? _signInWithOtp : _verifyPhoneNumber,
                 child: Text(_isOtpSent ? 'Verify OTP' : 'Send OTP'),
               ),
             ),
+
           ],
         ),
       ),

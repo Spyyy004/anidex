@@ -18,50 +18,7 @@ class _AllScansListPageState extends State<AllScansListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Encyclopedia"),
-        leading: IconButton(
-          icon: Icon(Icons.chevron_left),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        actions: [
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              setState(() {
-                _selectedFilter = value;
-              });
-            },
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'All',
-                child: Text('All'),
-              ),
-              PopupMenuItem(
-                value: 'Today',
-                child: Text('Today'),
-              ),
-              PopupMenuItem(
-                value: 'ThisWeek',
-                child: Text('This Week'),
-              ),
-              PopupMenuItem(
-                value: 'ThisMonth',
-                child: Text('This Month'),
-              ),
-            ],
-          ),
-          IconButton(
-            icon: Icon(Icons.sort),
-            onPressed: () {
-              setState(() {
-                _isDescending = !_isDescending; // Toggle sorting order
-              });
-            },
-          ),
-        ],
-      ),
+
       body: SafeArea(
         child: Column(
           children: [
@@ -297,7 +254,7 @@ class _AllScansListViewState extends State<AllScansListView> {
                         ),
                         Container(
                           width: 126,
-                          height: 102,
+                          height: 122,
                           decoration: BoxDecoration(
                             color: bgColor,
                             borderRadius: BorderRadius.all(Radius.circular(20)),

@@ -4,9 +4,9 @@ import 'package:anidex/screens/animal_info.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../components/phone_component.dart';
-
 
 class ScansListPage extends StatefulWidget {
   @override
@@ -19,7 +19,6 @@ class _ScansListPageState extends State<ScansListPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       body: Column(
         children: [
           Padding(
@@ -80,10 +79,19 @@ class _ScansListViewState extends State<ScansListView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Please log in to view your profile details.'),
+            Text(
+              'Please log in to view your scans',
+              style: GoogleFonts.poppins(fontSize: 16),
+            ),
             SizedBox(height: 20),
             ElevatedButton(
-              onPressed: () => _showLoginModal(user),
+              onPressed: (){
+                _showLoginModal(user);
+              },
+              style: ElevatedButton.styleFrom(
+                foregroundColor: Colors.white, backgroundColor: Theme.of(context).primaryColor,
+                padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+              ),
               child: Text('Log In'),
             ),
           ],
@@ -111,7 +119,12 @@ class _ScansListViewState extends State<ScansListView> {
             }
 
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return Center(child: Text('No scans found.'));
+              return Center(
+                child: Text(
+                  'No scans found.',
+                  style: GoogleFonts.poppins(),
+                ),
+              );
             }
 
             List<DocumentSnapshot> scans = snapshot.data!.docs;
@@ -227,20 +240,23 @@ class _ScansListViewState extends State<ScansListView> {
                                     ),
                                     child: Text(
                                       rarityText,
-                                      style: TextStyle(fontWeight: FontWeight.bold),
+                                      style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
                                     ),
                                   ),
                                   SizedBox(height: 8),
                                   Text(
                                     basicInfo['commonName'],
-                                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                    style: GoogleFonts.poppins(fontSize: 16, fontWeight: FontWeight.bold),
                                   ),
                                   SizedBox(height: 8),
                                   Row(
                                     children: [
                                       Image(image: AssetImage(typeImage), height: 30, width: 30),
                                       SizedBox(width: 8),
-                                      Text(type ?? "Unknown type"),
+                                      Text(
+                                        type ?? "Unknown type",
+                                        style: GoogleFonts.poppins(),
+                                      ),
                                     ],
                                   ),
                                 ],
@@ -250,7 +266,7 @@ class _ScansListViewState extends State<ScansListView> {
                               children: [
                                 Container(
                                   width: 126,
-                                  height: 102,
+                                  height: 122,
                                   decoration: BoxDecoration(
                                     color: bgColor,
                                     borderRadius: BorderRadius.all(Radius.circular(20)),
@@ -277,7 +293,7 @@ class _ScansListViewState extends State<ScansListView> {
                                 ),
 
                                 Positioned(
-                                top: 8,
+                                  top: 8,
                                   right: 8,
                                   child: FutureBuilder<bool>(
                                     future: isFavoriteFuture(scanId),
@@ -354,9 +370,7 @@ class _ScansListViewState extends State<ScansListView> {
       setState(() {
         user = _auth.currentUser;
         if (user != null) {
-         setState(() {
-
-         });
+          setState(() {});
         }
       });
     });
