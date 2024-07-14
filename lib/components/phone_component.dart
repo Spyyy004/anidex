@@ -1,7 +1,10 @@
 import 'package:anidex/utils.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth_platform_interface/firebase_auth_platform_interface.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:intl_phone_field/intl_phone_field.dart';
 
 class PhoneNumberLoginModal extends StatefulWidget {
@@ -19,10 +22,41 @@ class _PhoneNumberLoginModalState extends State<PhoneNumberLoginModal> {
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _otpController = TextEditingController();
   bool _isOtpSent = false;
+  bool isLoading = false;
   String _verificationId = '';
   String _countryCode = '+1'; // Default country code
 
   void _verifyPhoneNumber() async {
+    isLoading = true;
+    setState(() {
+
+    });
+    if (kIsWeb) {
+      // For Web
+      RecaptchaVerifier verifier = RecaptchaVerifier(
+
+        size: RecaptchaVerifierSize.normal,
+        theme: RecaptchaVerifierTheme.light, auth: FirebaseAuthPlatform.instance,
+      );
+
+      try {
+        ConfirmationResult confirmationResult = await _auth.signInWithPhoneNumber(
+          _countryCode + _phoneController.text,
+          verifier,
+        );
+        setState(() {
+          _verificationId = confirmationResult.verificationId;
+          _isOtpSent = true;
+          isLoading = false;
+        });
+      } catch (e) {
+        // Handle error
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Failed to send verification code: ${e.toString()}")));
+      }
+    }
     await _auth.verifyPhoneNumber(
       phoneNumber: _countryCode + _phoneController.text,
       verificationCompleted: (PhoneAuthCredential credential) async {
@@ -37,6 +71,7 @@ class _PhoneNumberLoginModalState extends State<PhoneNumberLoginModal> {
         setState(() {
           _verificationId = verificationId;
           _isOtpSent = true;
+          isLoading = false;
         });
       },
       codeAutoRetrievalTimeout: (String verificationId) {
@@ -49,6 +84,10 @@ class _PhoneNumberLoginModalState extends State<PhoneNumberLoginModal> {
 
   void _signInWithOtp() async {
     try {
+      isLoading = true;
+      setState(() {
+
+      });
       PhoneAuthCredential credential = PhoneAuthProvider.credential(
         verificationId: _verificationId,
         smsCode: _otpController.text,
@@ -58,7 +97,13 @@ class _PhoneNumberLoginModalState extends State<PhoneNumberLoginModal> {
       widget.onSuccess();
       Navigator.pop(context);
     } catch (e) {
-      // Handle error
+      Fluttertoast.showToast(msg: "Invalid OTP");
+    }
+    finally{
+      isLoading = false;
+      setState(() {
+
+      });
     }
   }
 
@@ -134,7 +179,7 @@ class _PhoneNumberLoginModalState extends State<PhoneNumberLoginModal> {
               ),
             SizedBox(height: 16.0),
             Center(
-              child: ElevatedButton(
+              child: isLoading ? CircularProgressIndicator(color: primaryColor,): ElevatedButton(
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.all<Color>(Theme.of(context).primaryColor),
                   foregroundColor: MaterialStateProperty.all<Color>(Colors.white),

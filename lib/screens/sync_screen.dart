@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:path_provider/path_provider.dart';
@@ -9,7 +10,7 @@ import '../utils.dart';
 import 'animal_info.dart';
 
 class LocalScanItem {
-  final String imagePath;
+  final XFile imagePath;
   bool isSubmitted;
 
   LocalScanItem({required this.imagePath, this.isSubmitted = false});
@@ -72,9 +73,9 @@ class _SyncDataPageState extends State<SyncDataPage> {
         opacity: scanItem.isSubmitted ? 0.5 : 1.0,
         duration: Duration(milliseconds: 500),
         child: ListTile(
-          leading: Image.file(File(scanItem.imagePath)),
+          leading: Image.file(File(scanItem.imagePath.path)),
           title: Text(
-            scanItem.imagePath.split('/').last,
+            scanItem.imagePath.path.split('/').last,
             style: TextStyle(fontWeight: FontWeight.bold),
           ),
           trailing: Row(
@@ -102,7 +103,7 @@ class _SyncDataPageState extends State<SyncDataPage> {
       List<FileSystemEntity> files = directory.listSync();
       for (var file in files) {
         if (file is File) {
-          localScans.add(LocalScanItem(imagePath: file.path));
+          localScans.add(LocalScanItem(imagePath: file as XFile));
         }
       }
     } catch (e) {
@@ -123,7 +124,7 @@ class _SyncDataPageState extends State<SyncDataPage> {
     gemini
         .textAndImage(
       text: prompt,
-      images: [File(scanItem.imagePath).readAsBytesSync()],
+      images: [File(scanItem.imagePath.path).readAsBytesSync()],
     )
         .then((value) {
       final jsonString = value!.content!.parts!.last.text.toString();
@@ -183,7 +184,7 @@ class _SyncDataPageState extends State<SyncDataPage> {
 
   void _deleteScan(LocalScanItem scanItem) {
     try {
-      File(scanItem.imagePath).deleteSync();
+      File(scanItem.imagePath.path).deleteSync();
       _loadLocalScans();
     } catch (e) {
       print('Error deleting scan: $e');

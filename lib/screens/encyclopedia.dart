@@ -1,6 +1,14 @@
 import 'package:anidex/components/search_bar.dart';
 import 'package:anidex/models/animal_info.dart';
 import 'package:anidex/screens/animal_info.dart';
+import 'package:anidex/utils.dart';
+import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
+import 'package:anidex/components/search_bar.dart';
+import 'package:anidex/models/animal_info.dart';
+import 'package:anidex/screens/animal_info.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -13,12 +21,12 @@ class AllScansListPage extends StatefulWidget {
 class _AllScansListPageState extends State<AllScansListPage> {
   String _searchTerm = '';
   String _selectedFilter = 'All'; // Default filter
+  String _selectedSort = 'Rarity'; // Default sorting option
   bool _isDescending = true; // Default sorting order
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-
       body: SafeArea(
         child: Column(
           children: [
@@ -32,10 +40,48 @@ class _AllScansListPageState extends State<AllScansListPage> {
                 },
               ),
             ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                DropdownButton<String>(
+                  value: _selectedSort,
+                  items: ['Rarity', 'Type'].map((String value) {
+                    return DropdownMenuItem<String>(
+                      value: value,
+                      child: Text(value),
+                    );
+                  }).toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _selectedSort = value!;
+                    });
+                  },
+                ),
+                DropdownButton<bool>(
+                  value: _isDescending,
+                  items: [
+                    DropdownMenuItem<bool>(
+                      value: true,
+                      child: Text('Descending'),
+                    ),
+                    DropdownMenuItem<bool>(
+                      value: false,
+                      child: Text('Ascending'),
+                    ),
+                  ].toList(),
+                  onChanged: (value) {
+                    setState(() {
+                      _isDescending = value!;
+                    });
+                  },
+                ),
+              ],
+            ),
             Expanded(
               child: AllScansListView(
                 searchTerm: _searchTerm,
                 filter: _selectedFilter,
+                sort: _selectedSort,
                 isDescending: _isDescending,
               ),
             ),
@@ -45,15 +91,18 @@ class _AllScansListPageState extends State<AllScansListPage> {
     );
   }
 }
+
 class AllScansListView extends StatefulWidget {
   final String searchTerm;
   final String filter;
+  final String sort;
   final bool isDescending;
 
   const AllScansListView({
     Key? key,
     required this.searchTerm,
     required this.filter,
+    required this.sort,
     required this.isDescending,
   }) : super(key: key);
 
@@ -70,21 +119,20 @@ class _AllScansListViewState extends State<AllScansListView> {
         date1.day == date2.day;
   }
 
-  // Helper function to check if two dates are in the same week
   bool isSameWeek(DateTime date1, DateTime date2) {
     int week1 = date1.weekday;
     int week2 = date2.weekday;
     return date1.difference(date2).inDays < 7 && week1 >= week2;
   }
 
-  // Helper function to check if two dates are in the same month
   bool isSameMonth(DateTime date1, DateTime date2) {
     return date1.year == date2.year && date1.month == date2.month;
   }
+
   @override
   Widget build(BuildContext context) {
     return StreamBuilder<QuerySnapshot>(
-      stream: _firestore.collection('scans').snapshots(), // Fetch all scans
+      stream: _firestore.collection('scans').snapshots(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return Center(child: CircularProgressIndicator());
@@ -96,7 +144,6 @@ class _AllScansListViewState extends State<AllScansListView> {
 
         List<DocumentSnapshot> scans = snapshot.data!.docs;
 
-        // Apply filtering based on selected filter
         if (widget.filter == 'Today') {
           scans = scans.where((scan) {
             DateTime scanDate = (scan['timestamp'] as Timestamp).toDate();
@@ -114,7 +161,6 @@ class _AllScansListViewState extends State<AllScansListView> {
           }).toList();
         }
 
-        // Apply search term filtering
         if (widget.searchTerm.isNotEmpty) {
           scans = scans.where((scan) =>
               scan['scanData']['basicInformation']['commonName']
@@ -122,16 +168,27 @@ class _AllScansListViewState extends State<AllScansListView> {
                   .contains(widget.searchTerm.toLowerCase())).toList();
         }
 
-        // Sort scans by rarity
-        scans.sort((a, b) {
-          int rarityA = a['scanData']['basicInformation']['rarity'];
-          int rarityB = b['scanData']['basicInformation']['rarity'];
-          if (widget.isDescending) {
-            return rarityB.compareTo(rarityA); // Descending order
-          } else {
-            return rarityA.compareTo(rarityB); // Ascending order
-          }
-        });
+        if (widget.sort == 'Rarity') {
+          scans.sort((a, b) {
+            int rarityA = a['scanData']['basicInformation']['rarity'];
+            int rarityB = b['scanData']['basicInformation']['rarity'];
+            if (widget.isDescending) {
+              return rarityB.compareTo(rarityA);
+            } else {
+              return rarityA.compareTo(rarityB);
+            }
+          });
+        } else if (widget.sort == 'Type') {
+          scans.sort((a, b) {
+            String typeA = a['scanData']['basicInformation']['type'];
+            String typeB = b['scanData']['basicInformation']['type'];
+            if (widget.isDescending) {
+              return typeB.compareTo(typeA);
+            } else {
+              return typeA.compareTo(typeB);
+            }
+          });
+        }
 
         return ListView.builder(
           itemCount: scans.length,
@@ -145,7 +202,6 @@ class _AllScansListViewState extends State<AllScansListView> {
             LinearGradient gradient;
             Color bgColor;
 
-            // Determine gradient, bgColor, and typeImage based on type
             if (type == 'water') {
               gradient = LinearGradient(
                 colors: [Color(0xFF5090D6), Colors.white],
@@ -172,7 +228,6 @@ class _AllScansListViewState extends State<AllScansListView> {
               typeImage = "assets/land.png";
             }
 
-            // Determine rarity text based on the specified ranges
             String rarityText = '';
             try {
               int rarity = basicInfo['rarity'];

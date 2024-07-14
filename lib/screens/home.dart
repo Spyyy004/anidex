@@ -48,18 +48,18 @@ class _MainPageState extends State<MainPage> {
     _checkConnectivity();
     _connectivitySubscription =
         Connectivity().onConnectivityChanged.listen((List<ConnectivityResult> result) {
-          _updateConnectivityStatus(result);
+          _updateConnectivityStatus(result[0]);
         });
   }
 
   Future<void> _checkConnectivity() async {
     var connectivityResult = await Connectivity().checkConnectivity();
-    _updateConnectivityStatus(connectivityResult);
+    _updateConnectivityStatus(connectivityResult[0]);
   }
 
-  void _updateConnectivityStatus(List<ConnectivityResult> result) {
+  void _updateConnectivityStatus(ConnectivityResult result) {
     setState(() {
-      _isConnected = result[0] != ConnectivityResult.none;
+      _isConnected = result != ConnectivityResult.none;
     });
     if (!_isConnected && _selectedIndex != 2) {
       _onItemTapped(2);
@@ -101,20 +101,33 @@ class _MainPageState extends State<MainPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Check if the device dimensions match typical mobile dimensions
+    bool isMobile = MediaQuery.of(context).size.width < 600 && MediaQuery.of(context).size.height < 1200;
+
+    if (!isMobile) {
+      return Scaffold(
+        body: Center(
+          child: Text(
+            "Please open the website on a mobile device",
+            style: TextStyle(fontSize: 24),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: Text('Anidex',style: header3Styles,),
+        title: Text('Anidex', style: header3Styles,),
       ),
       body: _widgetOptions.elementAt(_selectedIndex),
       bottomNavigationBar: BottomAppBar(
         color: Colors.white,
         surfaceTintColor: Colors.white,
-
         shape: CircularNotchedRectangle(),
         child: SizedBox(
           height: 60, // Adjusted height to prevent overflow
           child: BottomNavigationBar(
-            type:BottomNavigationBarType.shifting,
+            type: BottomNavigationBarType.shifting,
             iconSize: 12,
             backgroundColor: Colors.white,
             items: <BottomNavigationBarItem>[
@@ -147,7 +160,6 @@ class _MainPageState extends State<MainPage> {
               if (index == 2) return;
               _onItemTapped(index);
             },
-
           ),
         ),
       ),

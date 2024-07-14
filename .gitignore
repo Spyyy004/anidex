@@ -42,7 +42,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
-.env
-
+dotenv
+v 
 /ios/Runner/info.plist
 /lib/firebase_options.dart

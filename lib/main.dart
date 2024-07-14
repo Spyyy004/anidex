@@ -12,8 +12,8 @@ Future<void> main() async {
   await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform
   );
-  await dotenv.dotenv.load(fileName: '.env');
-  Gemini.init(apiKey: dotenv.dotenv.env['GEMINIKEY']!);
+  await dotenv.dotenv.load(fileName: 'dotenv');
+  Gemini.init(apiKey: dotenv.dotenv.env['GEMINIKEY'] ?? "");
   runApp(const MyApp());
 }
 
@@ -24,7 +24,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
+      title: 'Pokedex for Animals',
       theme: ThemeData(
         // This is the theme of your application.
         //

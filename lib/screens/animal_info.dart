@@ -4,6 +4,7 @@ import 'package:camera/camera.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,7 +15,7 @@ import '../utils.dart';
 import 'chat.dart';
 
 class AnimalInfo extends StatefulWidget {
-  final String capturedImage;
+  final dynamic capturedImage;
   final AnimalInfoModel animalInfoModel;
   final bool isInfo;
 
@@ -126,28 +127,75 @@ class _AnimalInfoState extends State<AnimalInfo> {
   }
 
   Widget _buildAnimalImage() {
-    return Container(
-      height: 300.0,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20.0),
-        image: DecorationImage(
-          image: widget.isInfo
-              ? NetworkImage(widget.capturedImage) as ImageProvider<Object>
-              : FileImage(File(widget.capturedImage)),
-          fit: BoxFit.cover,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.5),
-            spreadRadius: 2,
-            blurRadius: 7,
-            offset: Offset(0, 3),
+    if (widget.isInfo) {
+      return Container(
+        height: 300.0,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20.0),
+          image: DecorationImage(
+            image: NetworkImage(widget.capturedImage),
+            fit: BoxFit.cover,
           ),
-        ],
-      ),
-    );
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 2,
+              blurRadius: 7,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+      );
+    } else {
+      return kIsWeb
+          ? FutureBuilder<Uint8List?>(
+        future: _getBytesFromFile(widget.capturedImage),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.done &&
+              snapshot.data != null) {
+            return Container(
+              height: 300.0,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20.0),
+                image: DecorationImage(
+                  image: MemoryImage(snapshot.data!),
+                  fit: BoxFit.cover,
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.grey.withOpacity(0.5),
+                    spreadRadius: 2,
+                    blurRadius: 7,
+                    offset: Offset(0, 3),
+                  ),
+                ],
+              ),
+            );
+          } else {
+            return CircularProgressIndicator();
+          }
+        },
+      )
+          : Container(
+        height: 300.0,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20.0),
+          image: DecorationImage(
+            image: FileImage(File(widget.capturedImage)),
+            fit: BoxFit.cover,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              spreadRadius: 2,
+              blurRadius: 7,
+              offset: Offset(0, 3),
+            ),
+          ],
+        ),
+      );
+    }
   }
-
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
@@ -347,11 +395,21 @@ class _AnimalInfoState extends State<AnimalInfo> {
 
     try {
       // Step 1: Upload the image to Firebase Storage
-      String fileName = widget.animalInfoModel.basicInformation!.commonName.toString() + user.uid + widget.capturedImage.substring(0, 5);
+      String fileName = widget.animalInfoModel.basicInformation!.commonName.toString() + user.uid + widget.capturedImage.path.substring(0, 5);
       Reference storageRef = _storage.ref().child('scans/$fileName');
-      UploadTask uploadTask = storageRef.putFile(File(widget.capturedImage));
-      TaskSnapshot taskSnapshot = await uploadTask;
 
+      UploadTask uploadTask;
+      if (kIsWeb) {
+        // For web, we need to convert XFile to Uint8List
+        Uint8List imageBytes = await widget.capturedImage.readAsBytes();
+        uploadTask = storageRef.putData(imageBytes);
+      } else {
+        // For mobile, use the file path
+        File file = File(widget.capturedImage.path);
+        uploadTask = storageRef.putFile(file);
+      }
+
+      TaskSnapshot taskSnapshot = await uploadTask;
       String downloadURL = await taskSnapshot.ref.getDownloadURL();
 
       // Step 2: Create a new scan document in the 'scans' collection
@@ -408,6 +466,15 @@ class _AnimalInfoState extends State<AnimalInfo> {
         uploadSuccess = true;
         _isUploading = false; // Upload process completed, hide loader
       });
+    }
+  }
+  Future<Uint8List?> _getBytesFromFile(XFile file) async {
+    try {
+      final bytes = await file.readAsBytes();
+      return bytes;
+    } catch (e) {
+      print('Error reading file: $e');
+      return null;
     }
   }
 }
