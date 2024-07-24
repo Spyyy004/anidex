@@ -1,3 +1,4 @@
+import 'package:anidex/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -103,7 +104,7 @@ class _BadgesScreenState extends State<BadgesScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                Text(_showOnlyEarned ? "Show All" : 'Show Earned', style: TextStyle(fontSize: 16)),
+                Text(_showOnlyEarned ? "Show All" : 'Show Earned', style: labelStyles),
                 Switch(
                   value: _showOnlyEarned,
                   onChanged: (value) {
@@ -144,7 +145,7 @@ class _BadgesScreenState extends State<BadgesScreen> {
         ),
         title: Text(
           badge.name,
-          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+          style: labelStyles,
         ),
         subtitle: Text(badge.description),
         trailing: Icon(

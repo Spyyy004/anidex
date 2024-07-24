@@ -32,9 +32,38 @@ class AnimalInfo extends StatefulWidget {
 class _AnimalInfoState extends State<AnimalInfo> {
   bool _isUploading = false;
   bool uploadSuccess = false;
+  String typeImage = "";
+  String rarityText = '';
   final FirebaseAuth _auth = FirebaseAuth.instance;
   @override
   Widget build(BuildContext context) {
+    if (widget.animalInfoModel.basicInformation!.type == 'water') {
+
+      typeImage = "assets/water.png";
+    } else if (widget.animalInfoModel.basicInformation!.type == 'air') {
+      typeImage = "assets/air.png";
+    } else {
+      typeImage = "assets/land.png";
+    }
+
+    // Determine rarity text based on the specified ranges
+
+    try {
+      int rarity = widget.animalInfoModel.basicInformation!.rarity;
+      if (rarity >= 0 && rarity <= 3) {
+        rarityText = 'Abundant';
+      } else if (rarity >= 4 && rarity <= 5) {
+        rarityText = 'Common';
+      } else if (rarity >= 6 && rarity <= 7) {
+        rarityText = 'Uncommon';
+      } else if (rarity == 8 || rarity == 9) {
+        rarityText = 'Rare';
+      } else if (rarity == 10) {
+        rarityText = 'Exceptional';
+      }
+    } catch (e) {
+      rarityText = "Unknown";
+    }
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
@@ -68,6 +97,51 @@ class _AnimalInfoState extends State<AnimalInfo> {
                       SizedBox(height: 16.0),
                       _buildAnimalImage(),
                       SizedBox(height: 16.0),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 4, horizontal: 12),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              color: primaryColor,
+                            ),
+                            child: Text(
+                              rarityText,
+                              style: GoogleFonts.poppins(
+                                fontSize : 12,
+                                  fontWeight: FontWeight.w500,color: Colors.white),
+                            ),
+                          ),
+                          Container(
+                            padding: EdgeInsets.symmetric(
+                                vertical: 4, horizontal: 12),
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(15),
+                              color: primaryColor,
+                            ),
+                            child: Row(
+                              children: [
+                                Image(image: AssetImage(typeImage),
+                                    height: 20,
+                                    width: 20),
+                                SizedBox(width: 8),
+                                Text(
+                                  widget.animalInfoModel.basicInformation!.type ?? "Unknown type",
+                                  style: GoogleFonts.poppins(
+                                      fontSize : 12,
+                                    fontWeight: FontWeight.w500,
+                                    color: Colors.white
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                      // _buildSectionTitle('Scan Quality'),
+                      // _buildScanQuality(),
                       _buildSectionTitle('Basic Information'),
                       _buildBasicInfoList(),
                       _buildSectionTitle('Physical Description'),
@@ -90,14 +164,15 @@ class _AnimalInfoState extends State<AnimalInfo> {
                       _buildInfoParagraph(
                         widget.animalInfoModel.basicInformation?.diet ?? 'No diet information available.',
                       ),
-                      _buildSectionTitle('Conservation Status'),
-                      _buildInfoParagraph(
-                        widget.animalInfoModel.basicInformation?.conservationStatus ?? 'No conservation status available.',
-                      ),
                       _buildSectionTitle('Interesting Facts'),
                       _buildInterestingFacts(
                         widget.animalInfoModel.basicInformation?.interestingFacts ?? ['No interesting facts available.'],
                       ),
+                      _buildSectionTitle('Conservation Status'),
+                      _buildInfoParagraph(
+                        widget.animalInfoModel.basicInformation?.conservationStatus ?? 'No conservation status available.',
+                      ),
+
                       SizedBox(height: 16.0),
                     ],
                   ),
@@ -245,7 +320,7 @@ class _AnimalInfoState extends State<AnimalInfo> {
                   color: Colors.white,
                 ),
               ),
-              backgroundColor: Color(0xFF173EA5),
+              backgroundColor: primaryColor,
             ),
           );
         },
@@ -290,6 +365,20 @@ class _AnimalInfoState extends State<AnimalInfo> {
       ),
     );
   }
+
+  // Widget _buildScanQuality() {
+  //   return RatingBar.builder(
+  //     initialRating: widget.animalInfoModel.scanRating ?? 3, // Change this to the actual scan quality rating
+  //     minRating: 1,
+  //     direction: Axis.horizontal,
+  //     allowHalfRating: true,
+  //     itemCount: 5,
+  //     itemBuilder: (context, _) => Icon(
+  //       Icons.star,
+  //       color: Colors.amber,
+  //     ), onRatingUpdate: (double value) {  },
+  //   );
+  // }
 
   Widget _buildSaveScanButton() {
     return _isUploading

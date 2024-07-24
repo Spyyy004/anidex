@@ -46,3 +46,4 @@ dotenv
 v 
 /ios/Runner/info.plist
 /lib/firebase_options.dart
+/android/app/google-services.json

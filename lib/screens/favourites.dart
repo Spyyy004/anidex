@@ -1,3 +1,4 @@
+import 'package:anidex/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -53,7 +54,7 @@ class _FavoritesListViewState extends State<FavoritesListView> {
                 foregroundColor: Colors.white, backgroundColor: Theme.of(context).primaryColor,
                 padding: EdgeInsets.symmetric(horizontal: 32, vertical: 12),
               ),
-              child: Text('Log In'),
+              child: Text('Log In',style: subtitleStyles,),
             ),
           ],
         ),
@@ -68,7 +69,7 @@ class _FavoritesListViewState extends State<FavoritesListView> {
         }
 
         if (!snapshot.hasData || snapshot.data!.data() == null) {
-          return Center(child: Text('No favorites found.'));
+          return Center(child: Text('No favorites found.',style: header3Styles,));
         }
 
         // Safely access favorites array from snapshot
@@ -76,7 +77,7 @@ class _FavoritesListViewState extends State<FavoritesListView> {
         List<dynamic>? favorites = data['favorites'];
 
         if (favorites == null || favorites.isEmpty) {
-          return Center(child: Text('No favorites found.'));
+          return Center(child: Text('No favorites found.',style: header3Styles,));
         }
 
         return ListView.builder(

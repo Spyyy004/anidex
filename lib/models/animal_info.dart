@@ -1,7 +1,6 @@
 class AnimalInfoModel {
   String? animalIdentification;
   BasicInformation? basicInformation;
-
   AnimalInfoModel({this.animalIdentification, this.basicInformation});
 
   AnimalInfoModel.fromJson(Map<String, dynamic> json) {

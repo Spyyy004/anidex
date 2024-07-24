@@ -1,4 +1,5 @@
 import 'package:anidex/components/leaderboard_stack.dart';
+import 'package:anidex/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -88,11 +89,11 @@ class LeaderboardScreen extends StatelessWidget {
                             ),
                             title: Text(
                               user['username'],
-                              style: TextStyle(fontWeight: FontWeight.bold),
+                              style: labelStyles,
                             ),
                             trailing: Text(
                               'Scans: ${user['scanCount']}',
-                              style: TextStyle(fontSize: 16),
+                              style: subtitleStyles,
                             ),
                           ),
                         );

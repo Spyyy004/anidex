@@ -1,7 +1,10 @@
 import 'package:anidex/screens/home.dart';
 import 'package:anidex/screens/scan_camera.dart';
+import 'package:anidex/screens/welcome.dart';
 import 'package:anidex/utils.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
 
@@ -14,16 +17,32 @@ Future<void> main() async {
   );
   await dotenv.dotenv.load(fileName: 'dotenv');
   Gemini.init(apiKey: dotenv.dotenv.env['GEMINIKEY'] ?? "");
-  runApp(const MyApp());
+  runApp( MyApp());
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+class MyApp extends StatefulWidget {
+   MyApp({super.key});
+
+  @override
+  State<MyApp> createState() => _MyAppState();
+}
+
+class _MyAppState extends State<MyApp> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  User? user;
+@override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    user =  _auth.currentUser;
+  }
+
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Pokedex for Animals',
       theme: ThemeData(
         // This is the theme of your application.
@@ -44,7 +63,7 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: primaryColor),
         useMaterial3: true,
       ),
-      home:  MainPage(),
+      home: kIsWeb ? MainPage() : user != null ? MainPage() : MainPage(),
     );
   }
 }

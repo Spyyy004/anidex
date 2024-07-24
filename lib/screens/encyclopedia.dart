@@ -1,17 +1,11 @@
+
 import 'package:anidex/components/search_bar.dart';
 import 'package:anidex/models/animal_info.dart';
 import 'package:anidex/screens/animal_info.dart';
 import 'package:anidex/utils.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-
-import 'package:anidex/components/search_bar.dart';
-import 'package:anidex/models/animal_info.dart';
-import 'package:anidex/screens/animal_info.dart';
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AllScansListPage extends StatefulWidget {
   @override
@@ -48,7 +42,7 @@ class _AllScansListPageState extends State<AllScansListPage> {
                   items: ['Rarity', 'Type'].map((String value) {
                     return DropdownMenuItem<String>(
                       value: value,
-                      child: Text(value),
+                      child: Text(value, style: subtitleStyles,),
                     );
                   }).toList(),
                   onChanged: (value) {
@@ -62,11 +56,11 @@ class _AllScansListPageState extends State<AllScansListPage> {
                   items: [
                     DropdownMenuItem<bool>(
                       value: true,
-                      child: Text('Descending'),
+                      child: Text('Descending',style: subtitleStyles,),
                     ),
                     DropdownMenuItem<bool>(
                       value: false,
-                      child: Text('Ascending'),
+                      child: Text('Ascending',style: subtitleStyles,),
                     ),
                   ].toList(),
                   onChanged: (value) {
@@ -139,7 +133,7 @@ class _AllScansListViewState extends State<AllScansListView> {
         }
 
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text('No scans found.'));
+          return Center(child: Text('No scans found.',style: subtitleStyles,));
         }
 
         List<DocumentSnapshot> scans = snapshot.data!.docs;
@@ -281,46 +275,79 @@ class _AllScansListViewState extends State<AllScansListView> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Container(
-                                padding: EdgeInsets.symmetric(vertical: 4, horizontal: 8),
+                                padding: EdgeInsets.symmetric(
+                                    vertical: 4, horizontal: 8),
                                 decoration: BoxDecoration(
                                   borderRadius: BorderRadius.circular(15),
                                   color: Colors.white,
                                 ),
                                 child: Text(
                                   rarityText,
-                                  style: TextStyle(fontWeight: FontWeight.bold),
+                                  style: GoogleFonts.poppins(
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ),
                               SizedBox(height: 8),
                               Text(
                                 basicInfo['commonName'],
-                                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                                style: GoogleFonts.poppins(fontSize: 16,
+                                    fontWeight: FontWeight.bold),
                               ),
                               SizedBox(height: 8),
                               Row(
                                 children: [
-                                  Image(image: AssetImage(typeImage), height: 30, width: 30),
+                                  Image(image: AssetImage(typeImage),
+                                      height: 30,
+                                      width: 30),
                                   SizedBox(width: 8),
-                                  Text(type ?? "Unknown type"),
+                                  Text(
+                                    type ?? "Unknown type",
+                                    style: GoogleFonts.poppins(),
+                                  ),
                                 ],
                               ),
                             ],
                           ),
                         ),
-                        Container(
-                          width: 126,
-                          height: 122,
-                          decoration: BoxDecoration(
-                            color: bgColor,
-                            borderRadius: BorderRadius.all(Radius.circular(20)),
-                          ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.all(Radius.circular(20)),
-                            child: Image.network(
-                              imagePath,
-                              fit: BoxFit.cover,
+                        Stack(
+                          children: [
+                            Container(
+                              width: 126,
+                              height: 122,
+                              decoration: BoxDecoration(
+                                color: bgColor,
+                                borderRadius: BorderRadius.all(
+                                    Radius.circular(20)),
+                              ),
+                              child: ClipRRect(
+                                borderRadius: BorderRadius.all(
+                                    Radius.circular(20)),
+                                child: Image.network(
+                                  imagePath,
+                                  fit: BoxFit.cover,
+                                  loadingBuilder: (BuildContext context,
+                                      Widget child,
+                                      ImageChunkEvent? loadingProgress) {
+                                    if (loadingProgress == null)
+                                      return child;
+                                    return Center(
+                                      child: CircularProgressIndicator(
+                                        value: loadingProgress
+                                            .expectedTotalBytes != null
+                                            ? loadingProgress
+                                            .cumulativeBytesLoaded /
+                                            (loadingProgress
+                                                .expectedTotalBytes ?? 1)
+                                            : null,
+                                      ),
+                                    );
+                                  },
+                                ),
+                              ),
                             ),
-                          ),
+
+
+                          ],
                         ),
                       ],
                     ),

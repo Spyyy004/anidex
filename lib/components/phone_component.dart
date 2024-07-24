@@ -145,7 +145,7 @@ class _PhoneNumberLoginModalState extends State<PhoneNumberLoginModal> {
             Center(
               child: Text(
                 _isOtpSent ? 'Enter OTP' : 'Please Sign in to save your scans.',
-                style: TextStyle(fontSize: 18.0, fontWeight: FontWeight.bold),
+                style: labelStyles
               ),
             ),
             SizedBox(height: 16,),
@@ -185,7 +185,7 @@ class _PhoneNumberLoginModalState extends State<PhoneNumberLoginModal> {
                   foregroundColor: MaterialStateProperty.all<Color>(Colors.white),
                 ),
                 onPressed: _isOtpSent ? _signInWithOtp : _verifyPhoneNumber,
-                child: Text(_isOtpSent ? 'Verify OTP' : 'Send OTP'),
+                child: Text(_isOtpSent ? 'Verify OTP' : 'Send OTP',style: subtitleStyles),
               ),
             ),
 

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_gemini/flutter_gemini.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-const primaryColor = Color(0xFF173EA5);
+const primaryColor = Color(0xff8394ED);
 
 final buttonStyles = OutlinedButton.styleFrom(
   shape: RoundedRectangleBorder(
@@ -101,19 +101,19 @@ Now, respond to the message below.
 """;
 
 String scannedAnimal = "";
-TextStyle headerStyles = GoogleFonts.mPlusCodeLatin(
+TextStyle headerStyles = GoogleFonts.poppins(
     textStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 40)
 );
 
-TextStyle subHeaderStyles = GoogleFonts.mPlusCodeLatin(
+TextStyle subHeaderStyles = GoogleFonts.poppins(
     textStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 32)
 );
 
-TextStyle subHeaderNormalStyles = GoogleFonts.mPlusCodeLatin(
+TextStyle subHeaderNormalStyles = GoogleFonts.poppins(
     textStyle: TextStyle(fontWeight: FontWeight.normal, fontSize: 32)
 );
 
-TextStyle header3Styles = GoogleFonts.mPlusCodeLatin(
+TextStyle header3Styles = GoogleFonts.poppins(
     textStyle: TextStyle(fontWeight: FontWeight.w600, fontSize: 24)
 );
 

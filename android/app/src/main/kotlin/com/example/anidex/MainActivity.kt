@@ -1,4 +1,4 @@
-package com.example.anidex
+package com.iyush.anidex
 
 import io.flutter.embedding.android.FlutterActivity
 
